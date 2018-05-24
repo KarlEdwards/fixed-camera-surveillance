@@ -1,0 +1,17 @@
+Package: FCS
+Title: Fixed Camera Surveillance
+Version: 0.0.0.9000
+Authors@R: person("Karl", "Edwards", email = "karl.edwards@gmx.us", role = c("aut", "cre"))
+Description: Functions for feature extraction, clustering, and display.
+Depends: R (>= 3.4.3)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports: magrittr
+Suggests: knitr, rmarkdown, testthat
+VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2018-05-24 00:42:58 UTC; Karl
+Author: Karl Edwards [aut, cre]
+Maintainer: Karl Edwards <karl.edwards@gmx.us>

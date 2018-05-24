@@ -1,0 +1,170 @@
+---
+title: "Fixed Camera Surveillance"
+author: "Karl Edwards"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup_cache, include = FALSE }
+knitr::opts_chunk$set( cache = TRUE )
+```
+
+```{r setup_chunks, echo = FALSE, message = FALSE }
+knitr::opts_chunk$set( collapse = TRUE, comment = "#>" )
+options( tibble.print_min = 4L, tibble.print_max = 4L )
+library( dplyr )
+```
+
+```{r setup_hidden, echo = TRUE, message = FALSE }
+# --- Configuration
+img_path <- '/Users/Karl/Dropbox/Projects/Video-Captioning/pipelines/box2/'
+image_filenames <- dir( path=img_path )
+```
+
+# Introduction
+
+The Fixed Camera Surveillance (FCS) Package contains functions to cluster images in various ways, then display similar images together and evaluate which feature extraction and clustering methods work best.
+
+Common tasks for Fixed Camera Surveillance include:
+
+* Background Subtraction
+
+* Foreground Segmentation
+
+* Object Identification
+
+***
+
+# Background Subtraction
+
+The general approach is:
+
+1. Extract features from the images, for example, by using HoGs or hashes.
+
+2. Cluster the images, based on their features
+
+3. Display images for each cluster in its own collage.
+
+## Outline
+
+A. Feature extraction
+
+  1. Hashing
+
+     a. average
+
+     b. phash
+
+     c. dhash
+
+     d. ( invariant hash compares two images )
+
+  2. HoGs
+
+     a. cells
+
+     b. bins
+
+B. Clustering
+  1. K-means
+  
+  2. Linear SVM
+
+C. Display
+
+***
+
+# Examples
+
+## Feature Extraction 
+
+### Hashes
+
+```{r hash_examples, eval = TRUE, echo = TRUE, include = TRUE, message = FALSE, background = '#F7F7F7' }
+images_found <- as.logical( length( image_filenames ))
+if( !images_found ) cat( sprintf( 'No image files found\n'))
+if( images_found ){
+  hashes <- hash_batch( img_path )
+  all_hashes <- purrr::map( hashes, 2 )
+}
+```
+
+```{r show_hashes, eval = TRUE, echo = TRUE, include = TRUE, message = FALSE, background = '#AF7F77' }
+if( images_found ){
+  hashes$names
+  all_hashes[['values']][['files']][1:4]
+  all_hashes[['values']][['hashes']][1:4]
+}
+```
+
+### HoGs
+
+```{r hog_examples, eval = TRUE, echo = TRUE, include = TRUE, message = FALSE }
+if( images_found ){
+  hogs <- hog_batch( IMAGE_PATH = img_path )
+  all_hogs <- purrr::map( hogs, 2 )
+}
+```
+
+```{r show_hogs, eval = TRUE, echo = TRUE, include = TRUE, message = FALSE, background = '#AF7F77' }
+if( images_found ){
+  cat( sprintf( 'Results:\n' ))
+  print( hogs$names )
+  print( all_hogs[['values']][['files']][1:4] )
+  print( all_hogs[['values']][['hogs']][1:4] )
+}
+```
+
+# Clustering Examples
+
+```{r clustering_examples, eval = TRUE, echo = TRUE, message = FALSE, include = TRUE }
+#   3 cells
+#   | 6 bins
+#   | |
+hogs3c6b <- OpenImageR::HOG_apply( img_path, cells = 3, orientations = 6 )
+
+get_clusters <- function( data, filenames, algorithm = 'adaptive', N = 2 ){
+  clusters <- exemplar_image_names <- NULL
+  
+  if( algorithm == 'adaptive' ){
+    # adaptive clustering
+    clusters <- ADPclust::adpclust( data )
+    seq( clusters$nclust ) %>%
+      purrr::map_int( ~clusters$centers[ .x ] ) -> indexes
+  }
+  
+  if( algorithm == 'kmeans' ){
+    # K-means clustering
+    clusters <- kmeans( data, centers = N )
+    seq( N ) %>%
+      purrr::map_int( ~match( .x, clusters$cluster )) -> indexes
+  }
+  
+  exemplar_image_names <- if( any( grepl( 'indexes', ls() )) ) purrr::map_chr( indexes, ~filenames[ .x ] )
+
+  try(
+    if( length( clusters ) > 0 ){
+      # --- Get the name of the variable used to identify clusters
+      cluster_var <- grep( 'cluster*', names( clusters ), value=TRUE )
+
+      # --- Now use the cluster variable to get cluster IDs
+      clusters <- clusters[[ cluster_var ]]
+    }
+  )
+  list( IDs=clusters, exemplars=exemplar_image_names )
+}
+
+clustered <- get_clusters(
+    data = hogs3c6b[[ 2 ]]
+  , filenames = image_filenames
+  , algorithm = 'kmeans'
+  , N = 9
+)
+clustered$IDs
+clustered$exemplars
+
+```
