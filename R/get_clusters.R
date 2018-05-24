@@ -9,14 +9,13 @@
 #' @param algorithm Character Vector. Defaults to c( 'adaptive' )
 #' @param N Numeric Vector. Number of clusters (ignored for adaptive; otherwise defaults to 2)
 #' @return Returns a list of cluster IDs and cluster exemplar filenames
-#' @export
 #' @examples
 #' img_path <- '/Users/Karl/Dropbox/Projects/Video-Captioning/pipelines/box2/'
 #' image_filenames <- dir( path=img_path )
 #' clusters <- get_clusters( data = hogs[[2]][[1]]$hog, filenames = image_filenames )
 #' clusters$IDs
 #' clusters$exemplars
-
+#' @export
 get_clusters <- function( data, filenames, algorithm = 'adaptive', N = 2 ){
   clusters <- exemplar_image_names <- NULL
   

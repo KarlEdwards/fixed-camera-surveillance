@@ -13,12 +13,11 @@
 #' @param cfg_cells Numeric Vector. Defaults to 4:9
 #' @param cfg_bins  Numeric Vector. Defaults to 7:15
 #' @return Returns a list of HoGs
-#' @export
 #' @examples
 #' hogs <- hog_batch( IMAGE_PATH = '/Users/Karl/Dropbox/Projects/Video-Captioning/pipelines/box2/')
 #' hogs$names
 #' str( hogs$values )
-
+#' @export
 hog_batch <- function( IMAGE_PATH = './'
   , cfg_cells = 4:9
   , cfg_bins  = 7:15

@@ -5,13 +5,12 @@
 #' @param graphic_objects Vector of grobs Images to include in collage
 #' @param collage_file_name Character Vector. Defaults to 'Collage%03d.png'
 #' @return Returns NULL; Saves the collage image as a side effect.
-#' @export
 #' @examples
 #'
 #' filenames[ clusterID == thisNumber ] %>%
 #' map( ~get_raster_grob( .x )     ) -> grobs
 #' collage_of_grobs( grobs )
-
+#' @export
 collage_of_grobs <- function( graphic_objects, collage_file_name = 'Collage%03d.png' ){
   NUM_COLUMNS <- 5
   ggsave(
